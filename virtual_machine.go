@@ -2,10 +2,12 @@ package js
 
 import (
 	"errors"
+	"os"
+
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/console"
+	"github.com/dop251/goja_nodejs/process"
 	"github.com/dop251/goja_nodejs/require"
-	"os"
 )
 
 type virtualMachine struct {
@@ -25,8 +27,8 @@ func NewVirtualMachine() *virtualMachine {
 
 func (e *virtualMachine) init() {
 	_ = e.registry.Enable(e.vm)
-	//_, _ = req.Require("D:/GoProject/go-js/script/module.js")
 	console.Enable(e.vm)
+	process.Enable(e.vm)
 }
 
 // Destroy 销毁虚拟机，为了性能考虑，现在只是将之还给虚拟机池。
