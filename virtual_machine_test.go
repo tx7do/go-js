@@ -2,7 +2,6 @@ package js
 
 import (
 	"fmt"
-	"github.com/robertkrimen/otto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -24,7 +23,11 @@ func TestVirtualMachine_ExecuteString(t *testing.T) {
 	exe := NewVirtualMachine()
 	defer exe.Destroy()
 
-	jsString := `console.log('ddddd')`
+	jsString := `
+console.log('ddddd')
+role.Name = '角色'
+menu.Name = '目录'
+`
 
 	err := exe.LoadString(jsString)
 	assert.Nil(t, err)
@@ -39,11 +42,21 @@ func TestVirtualMachine_ExecuteString(t *testing.T) {
 	var role Role
 	var menu Menu
 
-	err = exe.Execute()
+	err = exe.Register("role", &role)
+	assert.Nil(t, err)
+
+	err = exe.Register("menu", &menu)
+	assert.Nil(t, err)
+
+	err = exe.ExecuteString(jsString)
 	assert.Nil(t, err)
 
 	fmt.Println(role)
 	fmt.Println(menu)
+}
+
+func sayHello(msg string) {
+	fmt.Printf("golang say Hello, %s.\n", msg)
 }
 
 func TestVirtualMachine_ExecuteFile(t *testing.T) {
@@ -60,10 +73,7 @@ func TestVirtualMachine_ExecuteFile(t *testing.T) {
 	err = exe.Register("u", u)
 	assert.Nil(t, err)
 
-	err = exe.Register("sayHello", func(call otto.FunctionCall) otto.Value {
-		fmt.Printf("Hello, %s.\n", call.Argument(0).String())
-		return otto.Value{}
-	})
+	err = exe.Register("sayHello", sayHello)
 	assert.Nil(t, err)
 
 	err = exe.Execute()
@@ -71,6 +81,35 @@ func TestVirtualMachine_ExecuteFile(t *testing.T) {
 
 	fmt.Println("Js set your token to:", u.Token())
 
-	err = exe.CallFunction("printMessage", "hello")
+	var fn func(string)
+	err = exe.GetFunction("printMessage", &fn)
+	fn("hello")
+	fn("world")
 	assert.Nil(t, err)
+}
+
+func TestVirtualMachine_DirectExecuteFile(t *testing.T) {
+	exe := NewVirtualMachine()
+	defer exe.Destroy()
+
+	err := exe.ExecuteFile("./script/test_require.js")
+	assert.Nil(t, err)
+	//fmt.Println(err.Error())
+}
+
+func TestVirtualMachine_Require(t *testing.T) {
+	exe := NewVirtualMachine()
+	defer exe.Destroy()
+
+	const SCRIPT = `
+	var m = require("./script/m.js");
+	m.test();
+	m.sayHi('CI');
+	`
+
+	err := exe.ExecuteString(SCRIPT)
+	assert.Nil(t, err)
+	err = exe.ExecuteFile("./script/test_require.js")
+	assert.Nil(t, err)
+	//fmt.Println(err.Error())
 }
