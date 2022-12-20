@@ -2,7 +2,9 @@
 
 基于[goja](https://github.com/dop251/goja)封装的一个JavaScript脚本引擎。
 
-最开始是基于[otto](https://github.com/robertkrimen/otto)封装的，但是很多ES5的标准都不支持，用着实在是蛋疼无比。后来改为[goja](https://github.com/dop251/goja)，goja甚至支持一些ES6的语法。
+最开始是基于[otto](https://github.com/robertkrimen/otto)封装的，可惜它对很多ES5的语法都不支持，用着实在是蛋疼无比。
+
+后来改为[goja](https://github.com/dop251/goja)，goja甚至支持一些ES6的语法。其实，goja是基于otto做的开发，可以说是青出于蓝，更甚于蓝。
 
 ## 基本交互
 
